@@ -1,0 +1,85 @@
+{
+  "name": "A1 - Meeting registration (Successful Meetings, monday.com)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-calendar:watchEvents",
+      "version": 5,
+      "parameters": {
+        "__IMTCONN__": null,
+        "calendar": "primary",
+        "watchBy": "created",
+        "showDeleted": false,
+        "singleEvents": false,
+        "maxResults": 10
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {}
+      }
+    },
+    {
+      "id": 2,
+      "module": "monday:CreateItem",
+      "version": 1,
+      "parameters": {
+        "__IMTCONN__": null
+      },
+      "filter": {
+        "name": "Only meetings with attendees",
+        "conditions": [
+          [
+            {
+              "a": "{{length(1.attendees)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "board": "",
+        "group": "",
+        "name": "{{1.summary}}",
+        "columnValues": {
+          "meeting_id": "{{1.id}}",
+          "scheduled_date": "{{formatDate(1.start.dateTime; \"YYYY-MM-DD\")}}",
+          "start_time": "{{formatDate(1.start.dateTime; \"YYYY-MM-DD HH:mm\")}}",
+          "end_time": "{{formatDate(1.end.dateTime; \"YYYY-MM-DD HH:mm\")}}",
+          "duration": "{{round((1.end.dateTime - 1.start.dateTime) / 60000)}}",
+          "inviter": "{{1.organizer.email}}",
+          "attendees": "{{join(map(1.attendees; \"email\"); \", \")}}"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {}
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}
