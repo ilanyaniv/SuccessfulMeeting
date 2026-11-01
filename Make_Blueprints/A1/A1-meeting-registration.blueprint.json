@@ -1,5 +1,5 @@
 {
-  "name": "A1 - Meeting registration (Successful Meetings, monday.com)",
+  "name": "A1 - Meeting registration (Successful Meetings, Supabase)",
   "flow": [
     {
       "id": 1,
@@ -24,40 +24,82 @@
     },
     {
       "id": 2,
-      "module": "monday:CreateItem",
-      "version": 1,
+      "module": "http:MakeRequest",
+      "version": 4,
       "parameters": {
-        "__IMTCONN__": null
+        "authenticationType": "noAuth"
+      },
+      "mapper": {
+        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/settings?select=min_attendees&id=eq.1",
+        "method": "get",
+        "headers": [
+          {
+            "name": "apikey",
+            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Accept",
+            "value": "application/vnd.pgrst.object+json"
+          }
+        ],
+        "parseResponse": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {}
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth"
       },
       "filter": {
-        "name": "Only meetings with attendees",
+        "name": "Enough attendees",
         "conditions": [
           [
             {
               "a": "{{length(1.attendees)}}",
-              "b": "0",
-              "o": "number:greater"
+              "b": "{{2.data.min_attendees}}",
+              "o": "number:greaterorequal"
             }
           ]
         ]
       },
       "mapper": {
-        "board": "",
-        "group": "",
-        "name": "{{1.summary}}",
-        "columnValues": {
-          "meeting_id": "{{1.id}}",
-          "scheduled_date": "{{formatDate(1.start.dateTime; \"YYYY-MM-DD\")}}",
-          "start_time": "{{formatDate(1.start.dateTime; \"YYYY-MM-DD HH:mm\")}}",
-          "end_time": "{{formatDate(1.end.dateTime; \"YYYY-MM-DD HH:mm\")}}",
-          "duration": "{{round((1.end.dateTime - 1.start.dateTime) / 60000)}}",
-          "inviter": "{{1.organizer.email}}",
-          "attendees": "{{join(map(1.attendees; \"email\"); \", \")}}"
-        }
+        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/meetings?on_conflict=calendar_event_id",
+        "method": "post",
+        "headers": [
+          {
+            "name": "apikey",
+            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Prefer",
+            "value": "resolution=ignore-duplicates,return=minimal"
+          }
+        ],
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"calendar_event_id\": \"{{1.id}}\",\n  \"title\": \"{{replace(replace(1.summary; \"/\\x5C/g\"; \"/\"); \"/\\x22/g\"; \"'\")}}\",\n  \"scheduled_date\": \"{{formatDate(1.start.dateTime; \"YYYY-MM-DD\")}}\",\n  \"start_time\": \"{{formatDate(1.start.dateTime; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"end_time\": \"{{formatDate(1.end.dateTime; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"inviter\": \"{{1.organizer.email}}\",\n  \"attendees\": \"{{join(map(1.attendees; \"email\"); \", \")}}\"\n}",
+        "parseResponse": false
       },
       "metadata": {
         "designer": {
-          "x": 300,
+          "x": 600,
           "y": 0
         },
         "restore": {}

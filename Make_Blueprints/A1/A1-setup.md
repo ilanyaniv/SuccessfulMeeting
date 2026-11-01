@@ -1,44 +1,65 @@
 # A1: Meeting registration (Make scenario)
 
-When a new meeting is created in Google Calendar, A1 adds an item for it to the **Meetings** board in monday.com.
+When a new meeting is created in Google Calendar, A1 adds a row for it to the **meetings** table in Supabase.
 
 ## Flow
 
 1. **Google Calendar: Watch Events** (trigger): picks up newly created events in the calendar.
-2. **Filter: Only meetings with attendees**: skips personal calendar blocks that have no invitees.
-3. **monday.com: Create an Item**: adds the meeting to the Meetings board.
+2. **HTTP: Make a request** (HTTP app version 4): reads `min_attendees` from the `settings` table in Supabase.
+3. **Filter: Enough attendees**: lets the meeting through only if its number of attendees is equal to or greater than `min_attendees`. Meetings with fewer attendees are not recorded.
+4. **HTTP: Make a request** (HTTP app version 4): sends the meeting to Supabase's REST API, which inserts it into the `meetings` table. If the same calendar event arrives twice, the second one is ignored.
 
-## Meetings board in monday.com
+## Database
 
-Create a board named **Meetings** with these columns. The item name holds the meeting title.
+`supabase-schema.sql` creates both tables from the PRD:
 
-| Column | monday column type | Value from Google Calendar | Filled by |
+**meetings**
+
+| Column | Type | Filled by |
+| --- | --- | --- |
+| meeting_id | bigint, generated automatically | Database |
+| calendar_event_id | text, unique | A1 (Google Calendar event ID, used by A2 to A4 to find the meeting) |
+| title | text | A1 |
+| scheduled_date | date | A1 |
+| start_time, end_time | timestamptz | A1 |
+| duration_minutes | integer, calculated from start and end | Database |
+| inviter | text (organizer's email) | A1 |
+| attendees | text (emails, comma-separated) | A1 |
+| summary_document | text | A2 |
+| transcript_path | text | A3 |
+| score | integer, 1 to 100 | A4 |
+
+**settings**: one row of values the automations read.
+
+| Column | Type | Default | Used by |
 | --- | --- | --- | --- |
-| Item name (Meeting title) | Name | Event title | A1 |
-| MeetingID | Text | Event ID: unique and automatic; A2 to A4 use it to find the meeting | A1 |
-| Scheduled date | Date | Start date | A1 |
-| Start time | Text | Start, `YYYY-MM-DD HH:mm` | A1 |
-| End time | Text | End, `YYYY-MM-DD HH:mm` | A1 |
-| Duration (minutes) | Numbers | End minus start | A1 |
-| Inviter | Email | Organizer's email | A1 |
-| Attendees | Long text | Attendee emails, comma-separated | A1 |
-| Summary document | Link | Empty | A2 |
-| Transcript path | Link | Empty | A3 |
-| Score | Numbers | Empty | A4 |
+| min_attendees | integer, 1 or more | 2 | A1: a meeting is recorded only if it has at least this many attendees |
 
-Attendees are stored as emails, not as monday People, because many attendees may not be monday users.
+To change the minimum, edit the value in **Table Editor > settings**, or run `update public.settings set min_attendees = 3;` in the SQL Editor. The table holds a single row, so there is only one value to change.
+
+**action_items**: action_item_id, meeting_id (links to meetings), name, accountable, due_date, status (Open or Done, default Open).
 
 ## Setup
 
-1. In monday.com, create the **Meetings** board with the columns above.
-2. In Make, create a new scenario, open the **...** menu at the bottom, choose **Import Blueprint**, and select `A1-meeting-registration.blueprint.json`.
-3. Open the **Google Calendar** module: connect your Google account and choose the calendar to watch.
-4. Open the **monday.com** module: connect your monday account, then select the **Meetings** board and a group. Make now lists the board's columns. Map each one as in the table above; the formulas are already in the blueprint and can be copied from it if a field comes up empty.
-5. Click **Run once**, then create a test meeting with at least one attendee in Google Calendar. A new item should appear on the board.
-6. Set the schedule (for example, every 15 minutes) and turn the scenario on.
+1. In Supabase, open **SQL Editor**, paste the contents of `supabase-schema.sql`, and click **Run**.
+2. In Supabase, open **Project Settings > API** and copy the **Project URL** and the **service_role** key.
+3. In Make, create a new scenario, open the **...** menu at the bottom, choose **Import Blueprint**, and select `A1-meeting-registration.blueprint.json`.
+4. Open the **Google Calendar** module: connect your Google account and choose the calendar to watch.
+5. Open **both HTTP modules** (the settings read and the meeting insert) and make the same two changes in each:
+   - In the URL, replace `YOUR-PROJECT-REF` with your project's reference (the part of the Project URL before `.supabase.co`).
+   - In the `apikey` header, replace `YOUR_SUPABASE_SERVICE_ROLE_KEY` with your secret key. If the key starts with `sb_secret_`, delete the `Authorization` header. If it is a legacy service_role key (starts with `eyJ`), put it in the `Authorization` header too, after `Bearer `.
+6. Click **Run once**, then create a test meeting with at least `min_attendees` attendees in Google Calendar. A new row should appear in **Table Editor > meetings**.
+7. Set the schedule (for example, every 15 minutes) and turn the scenario on.
+
+## Security
+
+The service_role key bypasses all access rules in Supabase. Keep it only inside Make, never in the PRD, the GitHub repo or a shared document. The tables have Row Level Security turned on with no public policies, so nobody can read them with the public (anon) key.
 
 ## Known limits
 
+- **Attendee count** is the number of people on the Google Calendar invite. Google usually lists the organizer as an attendee too, so a meeting with you and one guest counts as 2.
+
 - **All-day events** have no start or end time, so those columns and the duration stay empty.
 - **Recurring meetings** are recorded once, when the series is created, not once per occurrence.
-- **Edits** made to a meeting after it is created (new time, new attendees) are not updated on the board.
+- **Edits** made to a meeting after it is created (new time, new attendees) are not updated in the table.
+- **Titles** with double quotes are saved with single quotes instead, and backslashes become forward slashes, so the request stays valid JSON.
