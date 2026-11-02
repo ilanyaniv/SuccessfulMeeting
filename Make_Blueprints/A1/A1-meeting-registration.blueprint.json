@@ -64,13 +64,17 @@
         "authenticationType": "noAuth"
       },
       "filter": {
-        "name": "Enough attendees",
+        "name": "Enough attendees and has a start time",
         "conditions": [
           [
             {
               "a": "{{length(1.attendees)}}",
               "b": "{{2.data.min_attendees}}",
               "o": "number:greaterorequal"
+            },
+            {
+              "a": "{{ifempty(1.start.dateTime; ifempty(1.start.date; 1.start))}}",
+              "o": "exist"
             }
           ]
         ]
@@ -94,7 +98,7 @@
         ],
         "contentType": "json",
         "inputMethod": "jsonString",
-        "jsonStringBodyContent": "{\n  \"calendar_event_id\": \"{{1.id}}\",\n  \"title\": \"{{replace(replace(1.summary; \"/\\x5C/g\"; \"/\"); \"/\\x22/g\"; \"'\")}}\",\n  \"scheduled_date\": \"{{formatDate(1.start.dateTime; \"YYYY-MM-DD\")}}\",\n  \"start_time\": \"{{formatDate(1.start.dateTime; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"end_time\": \"{{formatDate(1.end.dateTime; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"inviter\": \"{{1.organizer.email}}\",\n  \"attendees\": \"{{join(map(1.attendees; \"email\"); \", \")}}\"\n}",
+        "jsonStringBodyContent": "{\n  \"calendar_event_id\": \"{{1.id}}\",\n  \"title\": \"{{replace(replace(1.summary; \"/\\x5C/g\"; \"/\"); \"/\\x22/g\"; \"'\")}}\",\n  \"scheduled_date\": \"{{formatDate(ifempty(1.start.dateTime; ifempty(1.start.date; 1.start)); \"YYYY-MM-DD\")}}\",\n  \"start_time\": \"{{formatDate(ifempty(1.start.dateTime; ifempty(1.start.date; 1.start)); \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"end_time\": \"{{formatDate(ifempty(1.end.dateTime; ifempty(1.end.date; 1.end)); \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"inviter\": \"{{1.organizer.email}}\",\n  \"attendees\": \"{{join(map(1.attendees; \"email\"); \", \")}}\"\n}",
         "parseResponse": false
       },
       "metadata": {
