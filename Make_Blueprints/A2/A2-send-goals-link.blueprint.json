@@ -1,0 +1,140 @@
+{
+  "name": "A2 - Send meeting goals link (Successful Meetings)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth"
+      },
+      "mapper": {
+        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/meetings?select=meeting_id,title,scheduled_date,inviter&goals_requested_at=is.null&goals_status=eq.Pending",
+        "method": "get",
+        "headers": [
+          {
+            "name": "apikey",
+            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          }
+        ],
+        "parseResponse": true
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {}
+      }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{1.data}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {}
+      }
+    },
+    {
+      "id": 3,
+      "module": "google-email:sendAnEmail",
+      "version": 4,
+      "parameters": {
+        "__IMTCONN__": null
+      },
+      "filter": {
+        "name": "Inviter has an email",
+        "conditions": [
+          [
+            {
+              "a": "{{2.inviter}}",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "to": [
+          "{{2.inviter}}"
+        ],
+        "subject": "Set the goal for your meeting: {{2.title}}",
+        "bodyType": "rawHtml",
+        "contents": "<p>Hi,</p><p>You scheduled <b>{{2.title}}</b> on {{2.scheduled_date}}. Before the meeting, please state its goal:</p><ul><li>What is the purpose of the meeting?</li><li>What should come out of it: answers, decisions, timetable?</li><li>Any action items you already know about.</li></ul><p><a href=\"https://YOUR-APP.lovable.app/meetings/{{2.meeting_id}}/goals\">Open the meeting goals page</a></p><p>It takes about two minutes. Thanks!<br>Successful Meetings</p>"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "restore": {}
+      }
+    },
+    {
+      "id": 4,
+      "module": "http:MakeRequest",
+      "version": 4,
+      "parameters": {
+        "authenticationType": "noAuth"
+      },
+      "mapper": {
+        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/meetings?meeting_id=eq.{{2.meeting_id}}",
+        "method": "patch",
+        "headers": [
+          {
+            "name": "apikey",
+            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
+          },
+          {
+            "name": "Prefer",
+            "value": "return=minimal"
+          }
+        ],
+        "parseResponse": false,
+        "contentType": "json",
+        "inputMethod": "jsonString",
+        "jsonStringBodyContent": "{\n  \"goals_requested_at\": \"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"summary_document\": \"https://YOUR-APP.lovable.app/meetings/{{2.meeting_id}}\"\n}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        },
+        "restore": {}
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}

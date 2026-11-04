@@ -2,6 +2,8 @@
 
 When a new meeting is created in Google Calendar, A1 adds a row for it to the **meetings** table in Supabase.
 
+The Successful Meetings web app, built with Lovable, reads the same table. Inviters see their meetings there and fill in each meeting's goals and summary (see A2-setup.md).
+
 ## Flow
 
 1. **Google Calendar: Watch Events** (trigger): picks up newly created events in the calendar.
@@ -25,7 +27,7 @@ When a new meeting is created in Google Calendar, A1 adds a row for it to the **
 | duration_minutes | integer, calculated from start and end | Database |
 | inviter | text (organizer's email) | A1 |
 | attendees | text (emails, comma-separated) | A1 |
-| summary_document | text | A2 |
+| summary_document | text (link to the meeting's page in the app) | A2 |
 | transcript_path | text | A3 |
 | score | integer, 1 to 100 | A4 |
 
@@ -59,7 +61,8 @@ The service_role key bypasses all access rules in Supabase. Keep it only inside 
 
 - **Attendee count** is the number of people on the Google Calendar invite. Google usually lists the organizer as an attendee too, so a meeting with you and one guest counts as 2.
 
-- **All-day events** have no start or end time, so those columns and the duration stay empty.
+- **All-day events** are saved with midnight as their start and end times, so their duration counts as a full day (1,440 minutes).
+- **Events with no start time** are skipped by the filter, so they never reach Supabase.
 - **Recurring meetings** are recorded once, when the series is created, not once per occurrence.
 - **Edits** made to a meeting after it is created (new time, new attendees) are not updated in the table.
 - **Titles** with double quotes are saved with single quotes instead, and backslashes become forward slashes, so the request stays valid JSON.
