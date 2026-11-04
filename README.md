@@ -23,6 +23,7 @@ The product requirements document (PRD) is in the [`PRD`](PRD) folder:
 - [Page 1: The Problem](PRD/successful-meetings-page1.md)
 - [Page 2: Solution and Architecture](PRD/successful-meetings-page2.md)
 - [Page 3: Development Plan and Success Metrics](PRD/successful-meetings-page3.md)
+- [Main Docx file](Successful-meetings-PRD-he.docx)
 
 ## License
 
