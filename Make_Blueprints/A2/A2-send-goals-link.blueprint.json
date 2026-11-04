@@ -79,7 +79,22 @@
           "y": 0
         },
         "restore": {}
-      }
+      },
+      "onerror": [
+        {
+          "id": 5,
+          "module": "builtin:Ignore",
+          "version": 1,
+          "parameters": {},
+          "mapper": null,
+          "metadata": {
+            "designer": {
+              "x": 600,
+              "y": 300
+            }
+          }
+        }
+      ]
     },
     {
       "id": 4,

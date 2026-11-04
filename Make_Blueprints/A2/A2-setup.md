@@ -78,15 +78,17 @@ I tested these rules on a local PostgreSQL copy with a stand-in for Supabase sig
 1. Import `A2-send-goals-link.blueprint.json` into a new Make scenario.
 2. In both HTTP modules, replace `YOUR-PROJECT-REF` and the key, the same way as in A1.
 3. In the **Gmail** module, connect the Google account that sends the emails.
-4. Replace `YOUR-APP.lovable.app` with your app's address in two places: the link in the Gmail email body, and `summary_document` in the last HTTP module.
-5. **Test:** create a test meeting in Google Calendar and let A1 record it. Run the scenario once and check that the email arrives. Open the link, sign in, fill in the goals with one action item and submit. Then check in Supabase that:
+4. **Skip meetings that fail.** The Gmail module has an **Ignore** error handler. If an email fails for one meeting (for example, a 403 error), Make skips that meeting and goes on to the next one. If you imported an older version of the blueprint, add it by hand: right-click the Gmail module, choose **Add error handler**, then choose **Ignore**.
+5. Replace `YOUR-APP.lovable.app` with your app's address in two places: the link in the Gmail email body, and `summary_document` in the last HTTP module.
+6. **Test:** create a test meeting in Google Calendar and let A1 record it. Run the scenario once and check that the email arrives. Open the link, sign in, fill in the goals with one action item and submit. Then check in Supabase that:
    - the meeting's row has the goals, `goals_status` = Submitted and the app link in `summary_document`;
    - the action item is in `action_items` with status Open.
-6. Turn the scenario on.
+7. Turn the scenario on.
 
 ## Known limits
 
 - **Sign-in email must match.** The inviter must sign in with the same Google account that organized the meeting in Google Calendar, or the app will not show the meeting.
 - **Attendees are matched by text.** The attendee rule checks whether the user's email appears in the attendees list, so an address that contains another one (for example, `ann@x.com` inside `joann@x.com`) could see that meeting.
+- **A skipped meeting is tried again on the next run.** The Ignore handler stops that meeting before the last HTTP module, so `goals_requested_at` stays empty. The next run tries the email again. Fix the cause (usually the sender's Gmail connection) or the meeting will keep showing up in the scenario's history as a warning.
 - **Every meeting recorded by A1 gets the email,** including meetings created after they already took place.
 - **Gmail module:** I wrote the blueprint without access to Make. If the Gmail module shows as unknown after import, add **Gmail > Send an email** by hand with the recipient, subject and body described above.
