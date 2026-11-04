@@ -1,6 +1,6 @@
 # Successful Meetings
 
-Successful Meetings helps organizations hold fewer, better meetings. Every meeting gets a clear goal, is checked against that goal afterwards, and produces tracked action items. Management gets the data to see which meetings are worth their cost.
+Successful Meetings helps organizations hold fewer, better meetings. Every meeting gets a clear goal, gets a written summary afterwards, and produces tracked action items. Management gets the data to see which meetings are worth their cost.
 
 ## The problem
 
@@ -9,21 +9,24 @@ Successful Meetings helps organizations hold fewer, better meetings. Every meeti
 
 ## How it works
 
-1. A new meeting is created in **Google Calendar** and recorded in the database.
-2. The inviter receives a **Google Form** to state the meeting's purpose, expected outcomes and action items.
-3. The meeting is **recorded and transcribed** in Zoom or Google Meet.
-4. The transcript is analyzed against the goals. The meeting gets a **summary** and a **success score from 1 to 100**, and **action items** with owners and due dates are extracted.
-5. Each person with open action items gets a **daily email** with a link to mark items as done.
-6. Managers can pull **reports** on demand: meetings held in a date range, working hours spent in meetings, and overdue action items.
+1. A new meeting is created in **Google Calendar**. If it has at least the minimum number of attendees set in the settings table, it is recorded in the **Supabase** database.
+2. The inviter gets an email with a link to the meeting's **Goals** page in the web app, built with **Lovable**. There they state the meeting's purpose and expected outcomes and can add action items.
+3. Meetings are not recorded or transcribed. After the meeting ends, the inviter gets a link to the **Summary** page and fills in what was discussed and decided, plus action items, each with an accountable person and a due date.
+4. Until the summary is submitted, the inviter gets a **daily reminder**.
+5. Each person with open action items gets a **daily email** with a link to the **My action items** page, where they can mark items as Done.
+6. Managers can pull **reports** on demand: meetings held in a date range, working hours spent in meetings, overdue action items and meetings whose summary is still pending.
+
+The automations run in **Make**. Everyone signs in to the app with their Google account.
 
 ## Documentation
 
-The product requirements document (PRD) is in the [`PRD`](PRD) folder:
+The full PRD in Hebrew is [Successful-Meetings-PRD-he.docx](Successful-Meetings-PRD-he.docx), in the main directory.
+
+The English PRD pages are in the [`PRD`](PRD) folder:
 
 - [Page 1: The Problem](PRD/successful-meetings-page1.md)
 - [Page 2: Solution and Architecture](PRD/successful-meetings-page2.md)
 - [Page 3: Development Plan and Success Metrics](PRD/successful-meetings-page3.md)
-- [Main Docx file](Successful-meetings-PRD-he.docx)
 
 ## License
 
