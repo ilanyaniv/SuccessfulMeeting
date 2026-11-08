@@ -6,29 +6,83 @@
       "module": "http:MakeRequest",
       "version": 4,
       "parameters": {
-        "authenticationType": "noAuth"
+        "tlsType": "",
+        "apiKeyAccount": 12146815,
+        "authenticationType": "apiKeyConnection"
       },
       "mapper": {
-        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/meetings?select=meeting_id,title,scheduled_date,inviter&goals_requested_at=is.null&goals_status=eq.Pending",
+        "url": "https://xldpeyvxruhdhrbprluj.supabase.co/rest/v1/meetings?select=meeting_id,title,scheduled_date,inviter&goals_requested_at=is.null&goals_status=eq.Pending&excluded=is.false",
         "method": "get",
-        "headers": [
-          {
-            "name": "apikey",
-            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
-          },
-          {
-            "name": "Authorization",
-            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
-          }
-        ],
-        "parseResponse": true
+        "headers": [],
+        "parseResponse": true,
+        "timeout": "40",
+        "shareCookies": false,
+        "allowRedirects": true,
+        "stopOnHttpError": true,
+        "requestCompressedContent": true
       },
       "metadata": {
         "designer": {
           "x": 0,
           "y": 0
         },
-        "restore": {}
+        "restore": {
+          "parameters": {
+            "tlsType": {
+              "label": "Empty"
+            },
+            "apiKeyAccount": {
+              "data": {
+                "scoped": "true",
+                "connection": "http-v4-apikey"
+              },
+              "label": "Ilan's API Key connection (Any public HTTPS service)"
+            },
+            "authenticationType": {
+              "label": "API keyUse a saved API key connection with service URL restrictions."
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authenticationType",
+            "type": "select",
+            "label": "Authentication type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "noAuth",
+                "apiKeyConnection",
+                "basicAuthConnection",
+                "oAuth",
+                "apiKey",
+                "basicAuth"
+              ]
+            }
+          },
+          {
+            "name": "tlsType",
+            "type": "select",
+            "label": "Transport layer security (TLS)",
+            "validate": {
+              "enum": [
+                "mTls",
+                "tls"
+              ]
+            }
+          },
+          {
+            "name": "proxyKeychain",
+            "type": "keychain:proxy",
+            "label": "Proxy"
+          },
+          {
+            "name": "apiKeyAccount",
+            "type": "account:http-v4-apikey",
+            "label": "Connection",
+            "required": true
+          }
+        ]
       }
     },
     {
@@ -101,20 +155,14 @@
       "module": "http:MakeRequest",
       "version": 4,
       "parameters": {
-        "authenticationType": "noAuth"
+        "tlsType": "",
+        "apiKeyAccount": 12146815,
+        "authenticationType": "apiKeyConnection"
       },
       "mapper": {
-        "url": "https://YOUR-PROJECT-REF.supabase.co/rest/v1/meetings?meeting_id=eq.{{2.meeting_id}}",
+        "url": "https://xldpeyvxruhdhrbprluj.supabase.co/rest/v1/meetings?meeting_id=eq.{{2.meeting_id}}&excluded=is.false",
         "method": "patch",
         "headers": [
-          {
-            "name": "apikey",
-            "value": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
-          },
-          {
-            "name": "Authorization",
-            "value": "Bearer YOUR_SUPABASE_SERVICE_ROLE_KEY"
-          },
           {
             "name": "Prefer",
             "value": "return=minimal"
@@ -123,14 +171,75 @@
         "parseResponse": false,
         "contentType": "json",
         "inputMethod": "jsonString",
-        "jsonStringBodyContent": "{\n  \"goals_requested_at\": \"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"summary_document\": \"https://YOUR-APP.lovable.app/meetings/{{2.meeting_id}}\"\n}"
+        "jsonStringBodyContent": "{\n  \"goals_requested_at\": \"{{formatDate(now; \"YYYY-MM-DDTHH:mm:ssZ\")}}\",\n  \"summary_document\": \"https://YOUR-APP.lovable.app/meetings/{{2.meeting_id}}\"\n}",
+        "timeout": "40",
+        "shareCookies": false,
+        "allowRedirects": true,
+        "stopOnHttpError": true,
+        "requestCompressedContent": true
       },
       "metadata": {
         "designer": {
           "x": 900,
           "y": 0
         },
-        "restore": {}
+        "restore": {
+          "parameters": {
+            "tlsType": {
+              "label": "Empty"
+            },
+            "apiKeyAccount": {
+              "data": {
+                "scoped": "true",
+                "connection": "http-v4-apikey"
+              },
+              "label": "Ilan's API Key connection (Any public HTTPS service)"
+            },
+            "authenticationType": {
+              "label": "API keyUse a saved API key connection with service URL restrictions."
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "authenticationType",
+            "type": "select",
+            "label": "Authentication type",
+            "required": true,
+            "validate": {
+              "enum": [
+                "noAuth",
+                "apiKeyConnection",
+                "basicAuthConnection",
+                "oAuth",
+                "apiKey",
+                "basicAuth"
+              ]
+            }
+          },
+          {
+            "name": "tlsType",
+            "type": "select",
+            "label": "Transport layer security (TLS)",
+            "validate": {
+              "enum": [
+                "mTls",
+                "tls"
+              ]
+            }
+          },
+          {
+            "name": "proxyKeychain",
+            "type": "keychain:proxy",
+            "label": "Proxy"
+          },
+          {
+            "name": "apiKeyAccount",
+            "type": "account:http-v4-apikey",
+            "label": "Connection",
+            "required": true
+          }
+        ]
       }
     }
   ],
@@ -150,6 +259,7 @@
     },
     "designer": {
       "orphans": []
-    }
+    },
+    "zone": "us2.make.com"
   }
 }
